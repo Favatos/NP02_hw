@@ -23,23 +23,13 @@ public partial class MainWindow : Window
             return;
         }
 
-        using Socket server = new Socket(
-            AddressFamily.InterNetwork,
-            SocketType.Stream,
-            ProtocolType.IP
-        );
-
-        IPAddress ipAddress = Dns.GetHostAddresses("localhost")
-       .Where(ipAdress => ipAdress.AddressFamily == AddressFamily.InterNetwork)
-       .First();
-        IPEndPoint endPoint = new IPEndPoint(ipAddress, 2025);
-        await server.ConnectAsync(endPoint);
+        using TcpClient server = new("localhost", 2025);
 
         byte[] bytes = Encoding.UTF8.GetBytes(t1.Text);
-        await server.SendAsync(bytes);
+        await server.GetStream().WriteAsync(bytes);
 
         bytes = new byte[4096];
-        int received = await server.ReceiveAsync(bytes);
+        int received = await server.GetStream().ReadAsync(bytes);
         t2.Text = Encoding.UTF8.GetString(bytes, 0, received);
     }
 }
